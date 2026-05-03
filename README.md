@@ -104,8 +104,8 @@ Create a `.env` file in the project root with values like:
 ```env
 DB_HOST=localhost
 DB_PORT=3306
-DB_USER=serveease_user
-DB_PASSWORD=2005
+DB_USER=root
+DB_PASSWORD="your password"
 DB_NAME=serveease
 PORT=3000
 JWT_SECRET=serveease_super_secret_change_in_production
