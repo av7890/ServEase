@@ -1,0 +1,127 @@
+﻿<app-navbar></app-navbar>
+
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Admin Dashboard</div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Sections</div>
+      <nav class="sidebar-nav">
+        <button type="button" [class.active]="section==='overview'" (click)="section='overview'">Overview</button>
+        <button type="button" [class.active]="section==='providers'" (click)="section='providers'">Providers</button>
+        <button type="button" [class.active]="section==='customers'" (click)="section='customers'">Customers</button>
+        <button type="button" [class.active]="section==='bookings'" (click)="section='bookings'">Bookings</button>
+        <button type="button" [class.active]="section==='reviews'" (click)="section='reviews'">Reviews</button>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="alert alert-info" *ngIf="notice">{{ notice }}</div>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <div class="card" *ngIf="loading">Loading admin dashboard...</div>
+
+    <ng-container *ngIf="!loading && !error">
+      <div *ngIf="section==='overview'">
+        <div class="page-header">
+          <h1 class="page-title">Admin Overview</h1>
+          <p class="page-subtitle">These totals come directly from the platform database.</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value">{{ overview.stats.total_customers || 0 }}</div><div class="stat-label">Customers</div></div>
+          <div class="stat-card"><div class="stat-value">{{ overview.stats.total_providers || 0 }}</div><div class="stat-label">Providers</div></div>
+          <div class="stat-card"><div class="stat-value">{{ overview.stats.pending_providers || 0 }}</div><div class="stat-label">Pending Providers</div></div>
+          <div class="stat-card"><div class="stat-value">{{ overview.stats.total_bookings || 0 }}</div><div class="stat-label">Bookings</div></div>
+          <div class="stat-card"><div class="stat-value">INR {{ overview.stats.total_revenue || 0 }}</div><div class="stat-label">Revenue</div></div>
+        </div>
+        <div class="section-header"><h3>Recent bookings</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Service</th><th>Customer</th><th>Provider</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let booking of overview.recentBookings || []">
+                <td>{{ booking.booking_id }}</td>
+                <td>{{ booking.service_name }}</td>
+                <td>{{ booking.customer_name }}</td>
+                <td>{{ booking.provider_name }}</td>
+                <td>{{ booking.status }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="section==='providers'">
+        <div class="page-header"><h1 class="page-title">Provider Approval and Status</h1></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let provider of providers">
+                <td>{{ provider.provider_id }}</td>
+                <td>{{ provider.name }}</td>
+                <td>{{ provider.email }}</td>
+                <td>{{ provider.city }}, {{ provider.area }}</td>
+                <td>{{ provider.status }}</td>
+                <td>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-success btn-sm" type="button" *ngIf="provider.status==='pending'" (click)="approveProvider(provider.provider_id)">Approve</button>
+                    <button class="btn btn-danger btn-sm" type="button" *ngIf="provider.status==='approved'" (click)="suspendProvider(provider.provider_id)">Suspend</button>
+                    <button class="btn btn-outline btn-sm" type="button" *ngIf="provider.status==='suspended'" (click)="reinstateProvider(provider.provider_id)">Reinstate</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="section==='customers'">
+        <div class="page-header"><h1 class="page-title">Customers</h1></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Total Bookings</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let customer of customers">
+                <td>{{ customer.customer_id }}</td>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>{{ customer.total_bookings }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="section==='bookings'">
+        <div class="page-header"><h1 class="page-title">All Bookings</h1></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Service</th><th>Customer</th><th>Provider</th><th>Payment</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let booking of bookings">
+                <td>{{ booking.booking_id }}</td>
+                <td>{{ booking.service_name }}</td>
+                <td>{{ booking.customer_name }}</td>
+                <td>{{ booking.provider_name }}</td>
+                <td>{{ booking.payment_status || 'pending' }}</td>
+                <td>{{ booking.status }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="section==='reviews'">
+        <div class="page-header"><h1 class="page-title">Platform Reviews</h1></div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div class="card" *ngFor="let review of reviews">
+            <div style="font-weight:600;">{{ review.service_name }} · Rating {{ review.rating }}</div>
+            <div style="font-size:.82rem;color:var(--ink-muted);margin:.25rem 0;">{{ review.customer_name }} reviewing {{ review.provider_name }}</div>
+            <div>{{ review.comment || 'No comment provided.' }}</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </main>
+</div>

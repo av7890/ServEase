@@ -1,0 +1,40 @@
+﻿<nav class="navbar">
+  <div class="container navbar-inner">
+    <a routerLink="/" class="navbar-brand" (click)="closeMobileMenu()">
+      <span class="logo-mark">SE</span>
+      <span>ServEase</span>
+    </a>
+
+    <div class="navbar-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/services" routerLinkActive="active">Services</a>
+      <a *ngIf="!user" routerLink="/register" [queryParams]="{ role: 'provider' }">Become a Provider</a>
+      <a *ngIf="user" [routerLink]="dashboardLink()">Dashboard</a>
+    </div>
+
+    <div class="navbar-actions">
+      <ng-container *ngIf="!user">
+        <a routerLink="/login" class="btn btn-outline btn-sm">Login</a>
+        <a routerLink="/register" class="btn btn-gold btn-sm">Get Started</a>
+      </ng-container>
+      <ng-container *ngIf="user">
+        <span class="nav-user">{{ user.name }}</span>
+        <button class="btn btn-ghost btn-sm" type="button" (click)="logout()">Logout</button>
+      </ng-container>
+    </div>
+
+    <button class="hamburger" type="button" (click)="mobileOpen = !mobileOpen" [attr.aria-expanded]="mobileOpen">
+      Menu
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" [class.open]="mobileOpen">
+  <a routerLink="/" (click)="closeMobileMenu()">Home</a>
+  <a routerLink="/services" (click)="closeMobileMenu()">Services</a>
+  <a *ngIf="!user" routerLink="/login" (click)="closeMobileMenu()">Login</a>
+  <a *ngIf="!user" routerLink="/register" (click)="closeMobileMenu()">Register</a>
+  <a *ngIf="!user" routerLink="/register" [queryParams]="{ role: 'provider' }" (click)="closeMobileMenu()">Become a Provider</a>
+  <a *ngIf="user" [routerLink]="dashboardLink()" (click)="closeMobileMenu()">Dashboard</a>
+  <button *ngIf="user" class="mobile-logout" type="button" (click)="logout()">Logout</button>
+</div>

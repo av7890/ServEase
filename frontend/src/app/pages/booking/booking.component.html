@@ -1,0 +1,84 @@
+﻿<app-navbar></app-navbar>
+
+<div class="container" style="padding-top:2rem;padding-bottom:4rem;">
+  <div class="card" *ngIf="loading">Loading booking flow...</div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <div *ngIf="!loading && service" style="display:grid;grid-template-columns:1.3fr 1fr;gap:2rem;align-items:start;">
+    <div class="card" *ngIf="step < 3">
+      <div class="booking-steps">
+        <div class="booking-step" [class.active]="step===1" [class.done]="step>1"><div class="step-circle">1</div><div class="step-label">Slot</div></div>
+        <div class="booking-step" [class.active]="step===2" [class.done]="step>2"><div class="step-circle">2</div><div class="step-label">Payment</div></div>
+        <div class="booking-step" [class.active]="step===3"><div class="step-circle">3</div><div class="step-label">Done</div></div>
+      </div>
+
+      <div *ngIf="step===1">
+        <div class="section-title" style="font-size:1.3rem;">Select an available slot</div>
+        <div *ngIf="slots.length > 0" class="slot-grid mt-4">
+          <button *ngFor="let slot of slots" type="button" class="slot-btn" [class.selected]="selectedSlotId===slot.slot_id" (click)="selectedSlotId = slot.slot_id">
+            {{ slot.available_date | date:'MMM d' }}<br />{{ slot.start_time }}
+          </button>
+        </div>
+        <div *ngIf="slots.length === 0" class="card mt-4">This provider has no future slots stored yet.</div>
+        <div class="d-flex gap-2 mt-4">
+          <a routerLink="/services" class="btn btn-outline">Back</a>
+          <button class="btn btn-primary" type="button" [disabled]="!selectedSlot" (click)="step = 2">Continue</button>
+        </div>
+      </div>
+
+      <div *ngIf="step===2">
+        <div class="section-title" style="font-size:1.3rem;">Confirm and pay</div>
+        <div class="form-group mt-3">
+          <label>Service Notes</label>
+          <textarea rows="4" [(ngModel)]="notes" placeholder="Anything the provider should know before arrival"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select [(ngModel)]="paymentMethod">
+            <option value="upi">UPI</option>
+            <option value="card">Card</option>
+            <option value="cash">Cash</option>
+          </select>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+          <button class="btn btn-outline" type="button" (click)="step = 1">Back</button>
+          <button class="btn btn-gold" type="button" [disabled]="submitting" (click)="confirmBooking()">{{ submitting ? 'Saving...' : (paymentMethod === 'cash' ? 'Create Cash Booking' : 'Create Booking and Payment') }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" *ngIf="step===3 && successData">
+      <div class="section-title" style="font-size:1.3rem;">Booking confirmed</div>
+      <div class="alert alert-info mt-3" *ngIf="bookingNotice">{{ bookingNotice }}</div>
+      <div class="divider"></div>
+      <div style="display:flex;flex-direction:column;gap:.75rem;">
+        <div><strong>Booking ID</strong><br />{{ successData.bookingId }}</div>
+        <div><strong>Payment ID</strong><br />{{ successData.paymentId || 'Not required now' }}</div>
+        <div><strong>Service</strong><br />{{ service.service_name }}</div>
+        <div><strong>Provider</strong><br />{{ service.provider_name }}</div>
+        <div><strong>Payment Method</strong><br />{{ paymentMethod | titlecase }}</div>
+      </div>
+      <div class="d-flex gap-2 mt-4">
+        <a routerLink="/customer-dashboard" class="btn btn-primary">Open Dashboard</a>
+        <a routerLink="/services" class="btn btn-outline">Book Another</a>
+      </div>
+    </div>
+
+    <div class="card" style="position:sticky;top:90px;">
+      <div class="service-card-img" style="height:220px;">Image Placeholder</div>
+      <div class="divider"></div>
+      <div class="service-card-category">Booking Summary</div>
+      <div class="section-title" style="font-size:1.4rem;">{{ service.service_name }}</div>
+      <div style="font-size:.85rem;color:var(--ink-muted);display:flex;flex-direction:column;gap:.45rem;">
+        <span>Provider: {{ service.provider_name }}</span>
+        <span>Location: {{ service.city }}, {{ service.area }}</span>
+        <span *ngIf="selectedSlot">Slot: {{ selectedSlot.available_date | date:'mediumDate' }} at {{ selectedSlot.start_time }}</span>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;"><span>Service Fee</span><span>INR {{ service.price }}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:.5rem;"><span>Payment Method</span><span>{{ paymentMethod | titlecase }}</span></div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

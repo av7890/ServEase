@@ -1,0 +1,171 @@
+﻿<app-navbar></app-navbar>
+
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Provider Dashboard</div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Sections</div>
+      <nav class="sidebar-nav">
+        <button type="button" [class.active]="section==='overview'" (click)="section='overview'">Overview</button>
+        <button type="button" [class.active]="section==='bookings'" (click)="section='bookings'">Bookings</button>
+        <button type="button" [class.active]="section==='services'" (click)="section='services'">Services</button>
+        <button type="button" [class.active]="section==='slots'" (click)="section='slots'">Availability</button>
+        <button type="button" [class.active]="section==='settings'" (click)="section='settings'">Settings</button>
+      </nav>
+    </div>
+    <div class="sidebar-user" *ngIf="profile">
+      <div class="sidebar-user-name">{{ profile.name }}</div>
+      <div class="sidebar-user-role">{{ profile.status }}</div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="alert alert-info" *ngIf="notice">{{ notice }}</div>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <div class="card" *ngIf="loading">Loading provider dashboard...</div>
+
+    <ng-container *ngIf="!loading && !error">
+      <div *ngIf="section==='overview'">
+        <div class="page-header">
+          <h1 class="page-title">Provider Overview</h1>
+          <p class="page-subtitle">Booking counts, earnings, and ratings are loaded from live booking, payment, and review tables.</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value">{{ summary.total_bookings }}</div><div class="stat-label">Total Bookings</div></div>
+          <div class="stat-card"><div class="stat-value">{{ summary.pending_bookings }}</div><div class="stat-label">Pending</div></div>
+          <div class="stat-card"><div class="stat-value">{{ summary.completed_bookings }}</div><div class="stat-label">Completed</div></div>
+          <div class="stat-card"><div class="stat-value">INR {{ summary.total_earnings }}</div><div class="stat-label">Total Earnings</div></div>
+          <div class="stat-card"><div class="stat-value">{{ summary.avg_rating || 0 }}</div><div class="stat-label">Average Rating</div></div>
+        </div>
+        <div class="section-header"><h3>Recent reviews</h3></div>
+        <div class="card" *ngIf="reviews.length===0">No customer reviews are stored yet.</div>
+        <div style="display:flex;flex-direction:column;gap:1rem;" *ngIf="reviews.length>0">
+          <div class="card" *ngFor="let review of reviews">
+            <div style="font-weight:600;">{{ review.customer_name }} · {{ review.service_name }}</div>
+            <div style="font-size:.82rem;color:var(--ink-muted);margin:.2rem 0;">Rating {{ review.rating }}</div>
+            <div>{{ review.comment || 'No comment provided.' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="section==='bookings'">
+        <div class="page-header">
+          <h1 class="page-title">Booking Requests</h1>
+          <p class="page-subtitle">Approve, complete, or cancel provider-side bookings.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Customer</th><th>Service</th><th>Schedule</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let booking of bookings">
+                <td>{{ booking.booking_id }}</td>
+                <td>{{ booking.customer_name }}</td>
+                <td>{{ booking.service_name }}</td>
+                <td>{{ booking.scheduled_time | date:'medium' }}</td>
+                <td>{{ booking.payment_status || 'pending' }}</td>
+                <td>{{ booking.status }}</td>
+                <td>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-success btn-sm" type="button" *ngIf="booking.status==='pending'" (click)="updateBookingStatus(booking.booking_id, 'confirmed')">Confirm</button>
+                    <button class="btn btn-outline btn-sm" type="button" *ngIf="booking.status==='confirmed'" (click)="updateBookingStatus(booking.booking_id, 'completed')">Complete</button>
+                    <button class="btn btn-danger btn-sm" type="button" *ngIf="booking.status!=='cancelled' && booking.status!=='completed'" (click)="updateBookingStatus(booking.booking_id, 'cancelled')">Cancel</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="section==='services'">
+        <div class="page-header">
+          <h1 class="page-title">Manage Services</h1>
+        </div>
+        <div class="card mb-4">
+          <form [formGroup]="serviceForm" (ngSubmit)="addService()">
+            <div class="section-header">
+              <div>
+                <div style="font-weight:600;">{{ editingServiceId ? 'Edit Service' : 'Add Service' }}</div>
+                <div style="font-size:.82rem;color:var(--ink-muted);">{{ editingServiceId ? 'Update the selected service and save your changes.' : 'Create a new service that customers can book.' }}</div>
+              </div>
+              <button class="btn btn-outline btn-sm" type="button" *ngIf="editingServiceId" (click)="cancelServiceEdit()">Cancel</button>
+            </div>
+            <div class="form-group"><label>Service Name</label><input type="text" formControlName="service_name" /></div>
+            <div class="form-group"><label>Description</label><textarea rows="4" formControlName="description"></textarea></div>
+            <div class="form-row">
+              <div class="form-group"><label>Price</label><input type="number" formControlName="price" /></div>
+              <div class="form-group"><label>Category</label><select formControlName="category_id"><option value="">Select</option><option *ngFor="let category of categories" [value]="category.category_id">{{ category.category_name }}</option></select></div>
+            </div>
+            <button class="btn btn-primary" type="submit">{{ editingServiceId ? 'Save Changes' : 'Add Service' }}</button>
+          </form>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div class="card" *ngFor="let service of services">
+            <div class="section-header">
+              <div>
+                <div style="font-weight:600;">{{ service.service_name }}</div>
+                <div style="font-size:.82rem;color:var(--ink-muted);">{{ service.category_name }} · INR {{ service.price }}</div>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline btn-sm" type="button" (click)="startServiceEdit(service)">Edit</button>
+                <button class="btn btn-danger btn-sm" type="button" (click)="removeService(service.service_id)">Delete</button>
+              </div>
+            </div>
+            <div>{{ service.description || 'No description provided yet.' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="section==='slots'">
+        <div class="page-header"><h1 class="page-title">Availability Slots</h1></div>
+        <div class="card mb-4">
+          <form [formGroup]="slotForm" (ngSubmit)="addSlot()">
+            <div class="form-group">
+              <label>Service</label>
+              <select formControlName="service_id">
+                <option value="">Select service</option>
+                <option *ngFor="let service of services" [value]="service.service_id">{{ service.service_name }}</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Date</label><input type="date" formControlName="available_date" /></div>
+              <div class="form-group"><label>Start Time</label><input type="time" formControlName="start_time" /></div>
+            </div>
+            <div class="form-group"><label>End Time</label><input type="time" formControlName="end_time" /></div>
+            <button class="btn btn-primary" type="submit">Add Slot</button>
+          </form>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div class="card" *ngFor="let slot of slots">
+            <div class="section-header">
+              <div>{{ slot.service_name }} · {{ slot.available_date | date:'mediumDate' }} · {{ slot.start_time }} to {{ slot.end_time }}</div>
+              <button class="btn btn-danger btn-sm" type="button" (click)="removeSlot(slot.slot_id)">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="section==='settings'">
+        <div class="page-header"><h1 class="page-title">Provider Settings</h1></div>
+        <div class="card" style="max-width:680px;">
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+            <div class="form-group"><label>Name</label><input type="text" formControlName="name" /></div>
+            <div class="form-group"><label>Phone</label><input type="text" formControlName="phone" /></div>
+            <div class="form-row">
+              <div class="form-group"><label>Experience</label><input type="number" formControlName="experience_years" /></div>
+              <div class="form-group"><label>Location</label><select formControlName="location_id"><option *ngFor="let location of locations" [value]="location.location_id">{{ location.city }}, {{ location.area }}</option></select></div>
+            </div>
+            <div class="form-group"><label>Bio</label><textarea rows="4" formControlName="bio"></textarea></div>
+            <button class="btn btn-primary" type="submit">Save Profile</button>
+          </form>
+          <div class="divider"></div>
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+            <div class="form-group"><label>Current Password</label><input type="password" formControlName="currentPassword" /></div>
+            <div class="form-group"><label>New Password</label><input type="password" formControlName="newPassword" /></div>
+            <button class="btn btn-outline" type="submit">Change Password</button>
+          </form>
+        </div>
+      </div>
+    </ng-container>
+  </main>
+</div>

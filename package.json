@@ -1,0 +1,27 @@
+{
+  "name": "serveease-ng",
+  "version": "2.0.0",
+  "description": "ServEase full-stack home services booking platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "build": "cd frontend && npm run build",
+    "build:watch": "cd frontend && npm run build -- --watch",
+    "setup": "npm install && cd frontend && npm install && cd .. && npm run build"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}

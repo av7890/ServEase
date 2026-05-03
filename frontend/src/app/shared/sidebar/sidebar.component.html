@@ -1,0 +1,17 @@
+<aside class="sidebar">
+  <div class="sidebar-logo">{{ portalLabel }}</div>
+  <nav class="sidebar-nav">
+    <button
+      *ngFor="let link of links"
+      type="button"
+      class="sidebar-nav-button"
+      [class.active]="activeSection === link.section"
+      (click)="setActiveSection(link.section)">
+      {{ link.label }}
+    </button>
+  </nav>
+  <div class="sidebar-user" *ngIf="user">
+    <div class="sidebar-user-name">{{ user.name }}</div>
+    <div class="sidebar-user-role">{{ user.role }}</div>
+  </div>
+</aside>

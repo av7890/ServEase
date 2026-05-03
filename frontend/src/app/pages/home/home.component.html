@@ -1,0 +1,137 @@
+﻿<app-navbar></app-navbar>
+
+<section class="hero">
+  <div class="hero-pattern"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">* Trusted by 1+ Households</div>
+      <h1>Expert Home Services<em> at your doorstep</em></h1>
+      <p>Browse services, compare approved professionals.</p>
+      <div class="hero-btns">
+        <a routerLink="/services" class="btn btn-gold btn-xl">Browse Services</a>
+        <a routerLink="/register" [queryParams]="{ role: 'provider' }" class="btn btn-outline btn-xl" style="border-color:rgba(255,255,255,.25);color:#fff;">Join as Provider</a>
+      </div>
+      <div class="hero-stats" *ngIf="!loading">
+        <div>
+          <div class="hero-stat-value">{{ stats.providers }}</div>
+          <div class="hero-stat-label">Approved Providers</div>
+        </div>
+        <div>
+          <div class="hero-stat-value">{{ stats.services }}</div>
+          <div class="hero-stat-label">Live Services</div>
+        </div>
+        <div>
+          <div class="hero-stat-value">{{ stats.bookings }}</div>
+          <div class="hero-stat-label">Bookings Stored</div>
+        </div>
+        <div>
+          <div class="hero-stat-value">{{ stats.average_rating || 0 }}</div>
+          <div class="hero-stat-label">Average Rating</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-label">Live Categories</div>
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Popular Servises</h2>
+      </div>
+      <a routerLink="/services" class="btn btn-outline">View Catalog</a>
+    </div>
+
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+    <div class="card-grid" *ngIf="!loading && categories.length > 0">
+      <button *ngFor="let category of categories" type="button" class="service-card" (click)="openCategory(category.category_id)" style="text-align:left;border:0;">
+        <div class="service-card-img">Image Placeholder</div>
+        <div class="service-card-body">
+          <div class="service-card-category">{{ category.category_name }}</div>
+          <div class="service-card-name">{{ category.service_count }} service entries</div>
+          <div class="service-card-desc">{{ category.description || 'No category description yet.' }}</div>
+          <div class="service-card-meta">
+            <div class="service-card-price">
+              <span *ngIf="category.min_price">From INR {{ category.min_price }}</span>
+              <span *ngIf="!category.min_price">No live pricing yet</span>
+            </div>
+            <div class="service-card-rating">Open</div>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <div class="card" *ngIf="!loading && categories.length === 0">
+      No categories are available yet.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-banner">
+      <div>
+        <h2>Service At You DoorStep</h2>
+      </div>
+      <div class="cta-banner-actions">
+        <a routerLink="/login" class="btn btn-primary">Account Login</a>
+        <a routerLink="/register" class="btn btn-gold">Create Account</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-label">Recent Reviews</div>
+    <h2 class="section-title">Stored customer feedback</h2>
+    <div class="card-grid" *ngIf="!loading && testimonials.length > 0">
+      <div class="testimonial-card" *ngFor="let testimonial of testimonials">
+        <div class="service-card-category">{{ testimonial.service_name }}</div>
+        <div class="testimonial-quote">{{ testimonial.comment }}</div>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">{{ testimonial.customer_name?.charAt(0) || 'C' }}</div>
+          <div>
+            <div class="testimonial-name">{{ testimonial.customer_name }}</div>
+            <div class="testimonial-role">{{ testimonial.provider_name }} · Rating {{ testimonial.rating }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" *ngIf="!loading && testimonials.length === 0">No reviews are stored yet.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;">
+      <div>
+        <div class="section-label">Contact</div>
+        <h2 class="section-title">Need platform help?</h2>
+        <p class="section-desc">The contact panel is intentionally local-only, while all platform data above comes straight from the database.</p>
+      </div>
+      <div class="card">
+        <div class="alert" *ngIf="contactMessage" [class.alert-success]="contactTone==='success'" [class.alert-error]="contactTone==='error'">{{ contactMessage }}</div>
+        <form [formGroup]="contactForm" (ngSubmit)="submitContact()">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" formControlName="firstName" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" />
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea rows="4" formControlName="message"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<app-footer></app-footer>

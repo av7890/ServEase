@@ -1,0 +1,51 @@
+﻿<app-navbar></app-navbar>
+
+<div style="background:var(--ink);padding:3rem 0;">
+  <div class="container">
+    <div class="section-label" style="color:var(--gold-light);">Services</div>
+    <h1 style="font-family:var(--ff-head);font-size:2.4rem;color:#fff;">Available services from approved providers</h1>
+    <p style="color:rgba(255,255,255,.65);margin-top:.75rem;max-width:640px;">
+  </div>
+</div>
+
+<div class="container" style="padding-top:2rem;padding-bottom:4rem;">
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Category</label>
+      <select [(ngModel)]="activeCategory">
+        <option value="">All</option>
+        <option *ngFor="let category of categories" [value]="category.category_id">{{ category.category_name }}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Search</label>
+      <input type="text" [(ngModel)]="searchQ" placeholder="Search services or providers" />
+    </div>
+    <button class="btn btn-primary btn-sm" type="button" (click)="applyFilters()">Apply</button>
+    <button class="btn btn-outline btn-sm" type="button" (click)="clearFilters()">Reset</button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+  <div class="card" *ngIf="loading">Loading services...</div>
+
+  <div class="card-grid" *ngIf="!loading && filteredServices.length > 0">
+    <article class="service-card" *ngFor="let service of filteredServices">
+      <div class="service-card-img">Image Placeholder</div>
+      <div class="service-card-body">
+        <div class="service-card-category">{{ service.category_name }}</div>
+        <div class="service-card-name">{{ service.service_name }}</div>
+        <div class="service-card-desc">{{ service.description || 'No description provided yet.' }}</div>
+        <div style="font-size:.8rem;color:var(--ink-muted);margin-bottom:1rem;">{{ service.provider_name }} · {{ service.city }}, {{ service.area }}</div>
+        <div class="service-card-meta">
+          <div class="service-card-price">INR {{ service.price }}</div>
+          <div class="service-card-rating">Rating {{ service.avg_rating || 0 }} · {{ service.review_count }} reviews</div>
+        </div>
+        <button class="btn btn-primary btn-block mt-3" type="button" (click)="openService(service.service_id)">Open Service</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="card" *ngIf="!loading && filteredServices.length === 0">No live services match the current filters.</div>
+</div>
+
+<app-footer></app-footer>
