@@ -115,7 +115,7 @@ JWT_EXPIRES_IN=7d
 ### 3. Load the database schema
 
 ```powershell
-Get-Content .\database\schema.sql | mysql -u serveease_user -p serveease
+Get-Content .\database\schema.sql | mysql -u root -p serveease
 ```
 
 If your MySQL account is different, update the command accordingly.
